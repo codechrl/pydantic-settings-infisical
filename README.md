@@ -16,11 +16,11 @@ pip install pydantic-settings-infisical
 ## Usage
 
 ```python
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic_settings_infisical import InfisicalSettingsSource
+from pydantic_settings import SettingsConfigDict
+from pydantic_settings_infisical import InfisicalBaseSettings
 
 
-class Settings(BaseSettings):
+class Settings(InfisicalBaseSettings):
     model_config = SettingsConfigDict(
         infisical_project_id="<your-infisical-project-id>",
         infisical_environment="prod",   # default: "prod"
@@ -31,18 +31,37 @@ class Settings(BaseSettings):
     DB_HOST: str
     DB_PASSWORD: str
 
+
+settings = Settings()
+```
+
+`InfisicalBaseSettings` wires Infisical into the source chain for you, with precedence
+**init kwargs → Infisical → env → dotenv → file secrets**.
+
+### Custom source ordering
+
+Need a different precedence, or source kwargs like `raise_on_error=True`? Use the source
+directly and override `settings_customise_sources` yourself:
+
+```python
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings_infisical import InfisicalSettingsSource
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(infisical_project_id="<your-infisical-project-id>")
+
+    DB_HOST: str
+
     @classmethod
     def settings_customise_sources(cls, settings_cls, init_settings, env_settings, dotenv_settings, file_secret_settings):
         return (
             init_settings,
-            InfisicalSettingsSource(settings_cls),  # Infisical wins over env/dotenv here
+            InfisicalSettingsSource(settings_cls, raise_on_error=True),
             env_settings,
             dotenv_settings,
             file_secret_settings,
         )
-
-
-settings = Settings()
 ```
 
 ## Authentication

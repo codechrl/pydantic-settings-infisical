@@ -1,6 +1,6 @@
 """Load pydantic-settings values from Infisical."""
 
-from pydantic_settings_infisical.source import InfisicalSettingsSource
+from pydantic_settings_infisical.source import InfisicalBaseSettings, InfisicalSettingsSource
 
-__all__ = ["InfisicalSettingsSource"]
-__version__ = "0.1.1"
+__all__ = ["InfisicalBaseSettings", "InfisicalSettingsSource"]
+__version__ = "0.2.0"

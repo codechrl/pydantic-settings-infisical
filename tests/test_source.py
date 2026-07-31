@@ -9,7 +9,7 @@ import pytest
 from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from pydantic_settings_infisical import InfisicalSettingsSource
+from pydantic_settings_infisical import InfisicalBaseSettings, InfisicalSettingsSource
 
 BASE_CFG = {"infisical_project_id": "proj-123"}
 
@@ -141,3 +141,27 @@ def test_no_project_id_is_noop(monkeypatch):
     monkeypatch.setenv("DB_HOST", "from-env")
     install_fake_sdk(monkeypatch, {"DB_HOST": "should-not-be-used"})
     assert make_settings_cls({}, DB_HOST=(str, "x"))().DB_HOST == "from-env"
+
+
+def test_infisical_base_settings_prewires_source(monkeypatch):
+    """Subclassing InfisicalBaseSettings needs no settings_customise_sources."""
+    monkeypatch.setenv("INFISICAL_TOKEN", "tok")
+    install_fake_sdk(monkeypatch, {"DB_HOST": "from-infisical"})
+
+    class Settings(InfisicalBaseSettings):
+        model_config = SettingsConfigDict(**BASE_CFG)
+        DB_HOST: str = "x"
+
+    assert Settings().DB_HOST == "from-infisical"  # Infisical beats the "x" default
+
+
+def test_infisical_base_settings_beats_env(monkeypatch):
+    monkeypatch.setenv("INFISICAL_TOKEN", "tok")
+    monkeypatch.setenv("DB_HOST", "from-env")
+    install_fake_sdk(monkeypatch, {"DB_HOST": "from-infisical"})
+
+    class Settings(InfisicalBaseSettings):
+        model_config = SettingsConfigDict(**BASE_CFG)
+        DB_HOST: str = "x"
+
+    assert Settings().DB_HOST == "from-infisical"

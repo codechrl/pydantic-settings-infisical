@@ -7,7 +7,7 @@ import os
 from typing import Any
 
 from pydantic.fields import FieldInfo
-from pydantic_settings import PydanticBaseSettingsSource
+from pydantic_settings import BaseSettings, PydanticBaseSettingsSource
 
 logger = logging.getLogger(__name__)
 
@@ -118,3 +118,18 @@ class InfisicalSettingsSource(PydanticBaseSettingsSource):
                 # fields (list/dict/...), exactly as the env source does.
                 values[key] = self.prepare_field_value(key, field, value, is_complex)
         return values
+
+
+class InfisicalBaseSettings(BaseSettings):
+    """A ``BaseSettings`` with Infisical pre-wired into the source chain.
+
+    Subclass this instead of ``BaseSettings`` to skip the ``settings_customise_sources``
+    boilerplate. Precedence: init kwargs > Infisical > env > dotenv > file secrets. Configure
+    the connection via ``model_config`` keys (``infisical_project_id=...``) or the matching
+    ``INFISICAL_*`` environment variables. Need a different ordering or source kwargs
+    (e.g. ``raise_on_error=True``)? Use ``InfisicalSettingsSource`` directly instead.
+    """
+
+    @classmethod
+    def settings_customise_sources(cls, settings_cls, init_settings, env_settings, dotenv_settings, file_secret_settings):
+        return (init_settings, InfisicalSettingsSource(settings_cls), env_settings, dotenv_settings, file_secret_settings)
