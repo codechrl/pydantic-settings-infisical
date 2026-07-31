@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pydantic-settings-infisical"
+dynamic = ["version"]
+description = "An Infisical secrets source for pydantic-settings."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+authors = [{ name = "kurniawan" }]
+keywords = ["pydantic", "pydantic-settings", "infisical", "secrets", "configuration"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Framework :: Pydantic :: 2",
+    "Topic :: Security",
+]
+dependencies = [
+    "pydantic-settings>=2.0",
+    "infisicalsdk>=1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/codechrl/pydantic-settings-infisical"
+Repository = "https://github.com/codechrl/pydantic-settings-infisical"
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[tool.hatch.version]
+path = "src/pydantic_settings_infisical/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pydantic_settings_infisical"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
